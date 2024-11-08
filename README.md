@@ -1,80 +1,115 @@
 # Vue 3 Icon Component Library
 
-This project provides a simple, reusable SVG icon system for Vue 3. Each icon is customizable with properties like `width`, `height`, and `fill` color. Other SVG attributes automatically pass through to the `<svg>` root, making customization easy without declaring extra props.
+This project provides a simple, reusable SVG icon system for Vue 3, consisting of:
+
+1. **IconBase Component**: Defines SVG attributes like `width`, `height`, and `fill`, and allows other attributes to fall through automatically.
+2. **Icon Components** (e.g., `HomeIcon.vue`, `SettingsIcon.vue`): Individual icons that slot specific SVG paths into `IconBase`. No props are defined here.
+3. **Parent Component**: Imports and uses icons with customizable attributes.
+
+With this structure, any attribute passed in the parent component will override the defaults `width, height and fill` set in `IconBase`.
 
 ## Project Structure
 
-The icon library consists of three main parts:
-
-1. **Icon Components** (e.g., `HomeIcon.vue`, `SettingsIcon.vue`):  
-   Individual icon files that use `IconBase` to wrap SVG paths. Add new icons here by creating files for each new icon and slotted paths into `IconBase`.
-
-2. **IconBase Component**:  
-   A wrapper for all SVG icons, handling attributes like `width`, `height`, and `fill`. Any additional attributes fall through automatically to `<svg>`, allowing custom attributes without needing props.
-
-3. **index.js**:  
-   Exports all icons in the `/icons` directory so they can be easily imported as a group in other components.
+- `IconBase.vue`: The root SVG wrapper with attributes and defaults.
+- `Icon Components`: Files for each icon, where the path is added. These do not have props or additional configurations.
+- `index.js`: Exports all icons for easy import.
 
 ## Installation and Setup
 
 1. **Clone the Repository**  
-   Clone the repository or copy `Icon`, `IconBase`, and `index.js` files into your Vue project.
+   Clone or copy `IconBase`, the individual icon components, and `index.js` into your Vue project.
 
-2. **Import Icons in Your Components**  
-   Use `import * as Icons from '@/components/icons'` to import all icons at once.
+2. **Import Icons**  
+   In any component where you need icons, import them as follows:
+
+   ```javascript
+   import * as Icons from '@/components/icons';
+   ```
 
 ## Usage Examples
 
-Icons are fully customizable in terms of size and color. Here’s how to use them:
+In your **parent component**, you can now use the icons as follows:
 
 ```vue
 <template>
-  <!-- Basic usage with default size and color -->
+  <!-- Default icon with IconBase defaults applied -->
   <Icons.HomeIcon />
 
-  <!-- Custom size and color -->
+  <!-- Custom width, height, and color -->
   <Icons.HomeIcon width="30" height="30" fill="#333333" />
 
-  <!-- Settings icon with different sizes and colors -->
-  <Icons.SettingsIcon width="24" height="24" fill="#000" />
+  <!-- Another icon with custom attributes -->
+  <Icons.SettingsIcon />
 </template>
 ```
 
-Attributes like `width`, `height`, `fill`, and other SVG attributes (e.g., `stroke`, `aria-label`) automatically fall through to the `<svg>` in `IconBase`.
+### How it Works
+
+When an icon is used in the parent component:
+
+1. **Attributes** like `width`, `height`, and `fill` can be passed to customize each icon. The mentioned attributes are also added to the IconBase.vue as default props. If they are ommited, the default values will apply.
+2. **Unspecified attributes** will default to values set in `IconBase`.
+3. **Other SVG attributes** (e.g., `stroke`, `aria-label`) will automatically fall through to `<svg>` without requiring additional props in the icon components.
 
 ## Adding New Icons
 
+To add a new icon:
+
 1. **Get the SVG Path**  
-   Copy the `<path>` element from your SVG source (e.g., Material Icons or custom SVGs).
+   Copy the `<path>` from the SVG file (e.g., an SVG gotten from Material Icons or any other SVG library).
 
 2. **Create a New Icon Component**  
-   Add the new icon file (e.g., `MyNewIcon.vue`). Import `IconBase` and slot the SVG path inside.
+   Inside the `icons` directory, create a new file (e.g., `MyNewIcon.vue`) and add the path. There is no need to add the wrapper (svg) tag as that is already set inside `IconBase.vue`. The `path` will be passed as a slot to the base component. 
 
 Example of a new icon component:
 
 ```vue
 <template>
-  <IconBase :width="width" :height="height" :fill="fill">
-    <!-- Paste your SVG path here -->
+  <IconBase>
+    <!-- Place your SVG path(s) here -->
     <path d="M10 20 ... Z" />
   </IconBase>
 </template>
 
 <script setup>
 import IconBase from './IconBase.vue';
-
-const props = defineProps({
-  width: { type: [String, Number], default: 24 },
-  height: { type: [String, Number], default: 24 },
-  fill: { type: String, default: 'currentColor' },
-});
 </script>
 ```
 
+## IconBase.vue
+
+The `IconBase` component looks like this:
+
+```vue
+<template>
+  <svg :width="width" :height="height" :fill="fill" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <slot />
+  </svg>
+</template>
+
+<script setup>
+  const props = defineProps({
+    height: {
+      type: [String, Number],
+      default: 24,
+    },
+    width: {
+      type: [String, Number],
+      default: 24,
+    },
+    fill: {
+      type: [String, Number],
+      default: "#4d4d4d",
+    },
+  });
+</script>
+```
+
+Here’s how `IconBase` works:
+
+- It defines `width`, `height`, and `fill` as customizable props with default values.
+- Any additional attributes passed in the parent component will be automatically applied to the `<svg>`, thanks to Vue’s attribute fallthrough.
+
 ## Final Notes
 
-- **Props**: `width`, `height`, and `fill` are the main customizable props passed from each icon component to `IconBase`.
-- **Attribute Fallthrough**: Other attributes passed to the icon (e.g., `stroke`, `aria-label`) will apply directly to the `<svg>` without needing explicit props.
-
-This setup keeps the code organized, making it easy to add or update icons in your project. Enjoy!
-```
+This structure keeps the code clean by centralizing SVG configuration in `IconBase`. Just update `index.js` when adding new icons, and they’ll be available project-wide with customizable attributes.
